@@ -13,12 +13,10 @@ Http.createServer(app).listen(app.get("port"), function() {
 app.use(Express.static(Path.join(__dirname, "")));
 app.use(BodyParser.urlencoded({extended: false}));
 
-var DataProvider = require("webix-data"),
-    SchedulerMongo = DataProvider(require("webix-mongo"), require("webix-connector"));
+var connector = require("connector-nodejs"),// Include connector.
+    SchedulerMongo = connector("mongodb://localhost:27017/scheduler", "mongo");// Init connector for mongoDB.
 
-SchedulerMongo.db("mongodb://localhost:27017/scheduler");
-app.all("/data", SchedulerMongo.crud("tasks", function(state, resolve) {
-    resolve(null, true);
-}));
+//Map data and init CRUD handler for "tasks" collection.
+app.all("/data", SchedulerMongo.map({text: "db_text"}).crud("tasks"));
 
 module.exports = app;

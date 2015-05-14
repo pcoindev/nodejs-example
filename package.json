@@ -1,11 +1,9 @@
 {
-  "name": "application-name",
+  "name": "dhtmlx-nodejs-sample",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "bluebird": "^2.9.25",
-    "express": "~4",
-    "mongodb": "^1.4.35",
-    "mongoskin": "^1.4.13"
+    "express": "^4.12.3",
+    "connector-nodejs": "^1.0.0"
   }
 }
