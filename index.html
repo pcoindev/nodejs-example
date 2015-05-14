@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>dhtmlx nodejs</title>
+    <meta name = "viewport" content = "initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no">
+
+    <!--INCLUDE SCHEDULER-->
+    <script src="public/js/dhtmlxscheduler.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="public/css/dhtmlxscheduler.css">
+</head>
+<script type="text/javascript" charset="utf-8">
+    var DP = null;
+    function init() {
+        dataProcessor.prototype.afterUpdate = function(that,xml,id){
+            //try to use json first
+            if (window.JSON){
+                try{
+                    var tag = JSON.parse(xml.xmlDoc.responseText);
+                    if(tag instanceof Array) {
+                        for(var i = 0; i < tag.length; i++) {
+                            var action = tag[i].action || this.getState(id) || "updated";
+                            var sid = tag.sid || id[0];
+                            var tid = tag.tid || id[0];
+                            that.afterUpdateCallback(sid, tid, action, tag);
+                        }
+                    }
+                    else {
+                        var action = tag.action || this.getState(id) || "updated";
+                        var sid = tag.sid || id[0];
+                        var tid = tag.tid || id[0];
+                        that.afterUpdateCallback(sid, tid, action, tag);
+                    }
+                    that.finalizeUpdate();
+                    return;
+                } catch(e){
+                }
+            }
+            //xml response
+            xml.getXMLTopNode("data"); //fix incorrect content type in IE
+
+            if (!xml.xmlDoc.responseXML){
+                if(this.obj && this.obj.callEvent){
+                    this.obj.callEvent("onSaveError", [id, xml.xmlDoc]);
+                }
+                return this.cleanUpdate(id);
+            }
+
+            var atag=xml.doXPath("//data/action");
+            if (!atag.length) return this.cleanUpdate(id);
+
+            for (var i=0; i<atag.length; i++){
+                var btag=atag[i];
+                var action = btag.getAttribute("type");
+                var sid = btag.getAttribute("sid");
+                var tid = btag.getAttribute("tid");
+
+                that.afterUpdateCallback(sid,tid,action,btag);
+            }
+            that.finalizeUpdate();
+        };
+
+        scheduler.config.xml_date="%Y-%m-%d %H:%i";
+        scheduler.init('scheduler_here', new Date(2015,0,10), "week");
+        scheduler.load("/data", "json");
+
+        var dp = new dataProcessor("/data");
+        DP = dp;
+        dp.init(scheduler);
+        dp.setTransactionMode("POST", false);
+    }
+</script>
+<body onload="init();">
+    <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:500px;'>
+        <div class="dhx_cal_navline">
+            <div class="dhx_cal_prev_button">&nbsp;</div>
+            <div class="dhx_cal_next_button">&nbsp;</div>
+            <div class="dhx_cal_today_button"></div>
+            <div class="dhx_cal_date"></div>
+            <div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
+            <div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
+            <div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+        </div>
+        <div class="dhx_cal_header">
+        </div>
+        <div class="dhx_cal_data">
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "bluebird": "^2.9.25",
+    "express": "~4",
+    "mongodb": "^1.4.35",
+    "mongoskin": "^1.4.13"
+  }
+}
