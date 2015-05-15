@@ -14,9 +14,19 @@ app.use(Express.static(Path.join(__dirname, "")));
 app.use(BodyParser.urlencoded({extended: false}));
 
 var connector = require("connector-nodejs"),// Include connector.
-    SchedulerMongo = connector("mongodb://localhost:27017/scheduler", "mongo");// Init connector for mongoDB.
+    schedulerMongo = connector("mongodb://localhost:27017/scheduler", "mongo");// Init connector for mongoDB.
 
-//Map data and init CRUD handler for "tasks" collection.
-app.all("/data", SchedulerMongo.map({text: "db_text"}).crud("tasks"));
+//Map data for db operations.
+var mappedSchedulerMongo = schedulerMongo.map({text: "db_text", start_date: "db_start_date"});
+app.all("/data", mappedSchedulerMongo.crud("tasks1", function(state, resolve) {
+
+    //If action is delete, stop processing request and send custom response.
+    if(state.action == "delete") {
+        resolve(null, false);
+        state.response.json({action: "error"});
+    }
+    else
+        resolve(null, true);
+}));
 
 module.exports = app;

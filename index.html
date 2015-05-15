@@ -9,62 +9,12 @@
     <link rel="stylesheet" type="text/css" href="public/css/dhtmlxscheduler.css">
 </head>
 <script type="text/javascript" charset="utf-8">
-    var DP = null;
     function init() {
-        dataProcessor.prototype.afterUpdate = function(that,xml,id){
-            //try to use json first
-            if (window.JSON){
-                try{
-                    var tag = JSON.parse(xml.xmlDoc.responseText);
-                    if(tag instanceof Array) {
-                        for(var i = 0; i < tag.length; i++) {
-                            var action = tag[i].action || this.getState(id) || "updated";
-                            var sid = tag.sid || id[0];
-                            var tid = tag.tid || id[0];
-                            that.afterUpdateCallback(sid, tid, action, tag);
-                        }
-                    }
-                    else {
-                        var action = tag.action || this.getState(id) || "updated";
-                        var sid = tag.sid || id[0];
-                        var tid = tag.tid || id[0];
-                        that.afterUpdateCallback(sid, tid, action, tag);
-                    }
-                    that.finalizeUpdate();
-                    return;
-                } catch(e){
-                }
-            }
-            //xml response
-            xml.getXMLTopNode("data"); //fix incorrect content type in IE
-
-            if (!xml.xmlDoc.responseXML){
-                if(this.obj && this.obj.callEvent){
-                    this.obj.callEvent("onSaveError", [id, xml.xmlDoc]);
-                }
-                return this.cleanUpdate(id);
-            }
-
-            var atag=xml.doXPath("//data/action");
-            if (!atag.length) return this.cleanUpdate(id);
-
-            for (var i=0; i<atag.length; i++){
-                var btag=atag[i];
-                var action = btag.getAttribute("type");
-                var sid = btag.getAttribute("sid");
-                var tid = btag.getAttribute("tid");
-
-                that.afterUpdateCallback(sid,tid,action,btag);
-            }
-            that.finalizeUpdate();
-        };
-
-        scheduler.config.xml_date="%Y-%m-%d %H:%i";
-        scheduler.init('scheduler_here', new Date(2015,0,10), "week");
+        scheduler.config.xml_date = "%Y-%m-%d %H:%i";
+        scheduler.init('scheduler_here', new Date(2015, 0, 10), "week");
         scheduler.load("/data", "json");
 
         var dp = new dataProcessor("/data");
-        DP = dp;
         dp.init(scheduler);
         dp.setTransactionMode("POST", false);
     }
